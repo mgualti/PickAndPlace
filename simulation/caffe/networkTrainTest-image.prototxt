@@ -1,0 +1,190 @@
+name: 'networkTrainTest-image'
+
+# LeNet on top of a simple 2-hidden-layer, fully-connected network. Takes an image and a problem-specific state feature vector.
+
+# === INPUTS ====
+
+layer {
+   type: "HDF5Data"
+   top: "state"
+   top: "label"
+   hdf5_data_param {
+     source: "/home/mgualti/mgualti/PickAndPlace/simulation/caffe/fileNameList-train.txt"
+     batch_size: 32
+   }
+   include { phase:TRAIN }
+}
+layer {
+   type: "HDF5Data"
+   top: "imagestate"
+   hdf5_data_param {
+     source: "/home/mgualti/mgualti/PickAndPlace/simulation/caffe/fileNameList-train.txt"
+     batch_size: 32
+   }
+   include { phase:TRAIN }
+}
+layer {
+   type: "HDF5Data"
+   top: "state"
+   top: "label"
+   hdf5_data_param {
+     source: "/home/mgualti/mgualti/PickAndPlace/simulation/caffe/fileNameList-test.txt"
+     batch_size: 32
+   }
+   include { phase:TEST }
+}
+layer {
+   type: "HDF5Data"
+   top: "imagestate"
+   hdf5_data_param {
+     source: "/home/mgualti/mgualti/PickAndPlace/simulation/caffe/fileNameList-test.txt"
+     batch_size: 32
+   }
+   include { phase:TEST }
+} 
+
+# === LENET ====
+
+layer {
+  type: "Convolution"
+  name: "lenet-conv1"
+  top: "lenet-conv1"
+  bottom: "imagestate"
+  convolution_param {
+    num_output: 20
+    kernel_size: 5
+    weight_filler {
+      type: "xavier"
+    }
+  }
+}
+layer {
+  type: "Pooling"
+  name: "lenet-pool1"
+  top: "lenet-pool1"
+  bottom: "lenet-conv1"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  type: "Convolution"
+  name: "lenet-conv2"
+  top: "lenet-conv2"
+  bottom: "lenet-pool1"
+  convolution_param {
+    num_output: 50
+    kernel_size: 5
+    weight_filler {
+      type: "xavier"
+    }
+  }
+}
+layer {
+  name: "lenet-pool2"
+  type: "Pooling"
+  top: "lenet-pool2"
+  bottom: "lenet-conv2"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  type: "InnerProduct"
+  name: "lenet-ip1"
+  top: "lenet-ip1"
+  bottom: "lenet-pool2"
+  inner_product_param {
+    num_output: 500
+    weight_filler {
+      type: "xavier"
+    }
+  }
+}
+layer {
+  name: "lenet-relu1"
+  type: "ReLU"
+  bottom: "lenet-ip1"
+  top: "lenet-ip1"
+}
+layer {
+  type: "InnerProduct"
+  name: "lenet-ip2"
+  top: "lenet-ip2"
+  bottom: "lenet-ip1"
+  inner_product_param {
+    num_output: 100
+    weight_filler {
+      type: "xavier"
+    }
+  }
+}
+
+# === CONNECTION ===
+
+layer {
+  type: "Concat"
+  name: "concat"
+  top: "concat"
+  bottom: "lenet-ip2"
+  bottom: "state"
+}
+
+# === MARCNET ====
+
+layer {
+  type: "InnerProduct"
+  name: "ip1"
+  top: "ip1"
+  bottom: "concat"
+  inner_product_param {
+    num_output: 60
+    weight_filler { type: 'xavier' }
+  }
+}
+layer {
+  type: "ReLU"
+  name: "relu1"
+  top: "ip1"
+  bottom: "ip1"
+}
+layer {
+  type: 'InnerProduct'
+  name: 'ip2'
+  top: 'ip2'
+  bottom: 'ip1'
+  inner_product_param {
+    num_output: 60
+    weight_filler { type: 'xavier' }
+  }
+}
+layer {
+  type: "ReLU"
+  name: "relu2"
+  top: "ip2"
+  bottom: "ip2"
+}
+layer {
+  type: 'InnerProduct'
+  name: 'ip3'
+  top: 'ip3'
+  bottom: 'ip2'
+  inner_product_param {
+    num_output: 1
+    weight_filler { type: 'xavier' }
+  }
+}
+
+# === OUTPUT ===
+
+layer {
+  type: "EuclideanLoss"
+  name: "loss"
+  top: "loss"
+  bottom: "ip3"
+  bottom: "label"  
+}

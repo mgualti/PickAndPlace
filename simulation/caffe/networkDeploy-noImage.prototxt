@@ -1,0 +1,54 @@
+name: 'networkDeploy-noImage'
+
+# a simple 2-hidden-layer, fully-connected network that uses the state that does not include an
+# image and outputs a value function estimate
+
+layer {
+  type: "Input"
+  name: "state"
+  top: "state"
+  top: "label"
+  input_param { shape: { dim: 1 dim: 31 } }
+}
+layer {
+  type: 'InnerProduct'
+  name: 'ip1'
+  top: 'ip1'
+  bottom: 'state'
+  inner_product_param {
+    num_output: 60
+    weight_filler { type: 'xavier' }
+  }
+}
+layer {
+  type: "ReLU"
+  name: "relu1"
+  top: "ip1"
+  bottom: "ip1"
+}
+layer {
+  type: 'InnerProduct'
+  name: 'ip2'
+  top: 'ip2'
+  bottom: 'ip1'
+  inner_product_param {
+    num_output: 60
+    weight_filler { type: 'xavier' }
+  }
+}
+layer {
+  type: "ReLU"
+  name: "relu2"
+  top: "ip2"
+  bottom: "ip2"
+}
+layer {
+  type: 'InnerProduct'
+  name: 'ip3'
+  top: 'ip3'
+  bottom: 'ip2'
+  inner_product_param {
+    num_output: 1
+    weight_filler { type: 'xavier' }
+  }
+}

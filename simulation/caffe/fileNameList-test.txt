@@ -1,0 +1,1 @@
+/home/mgualti/mgualti/PickAndPlace/simulation/caffe/test.h5

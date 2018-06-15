@@ -1,0 +1,74 @@
+name: 'networkTrainTest-noImage'
+
+# a simple 2-hidden-layer, fully-connected network that uses the state that does not include an
+# image and outputs a value function estimate
+
+layer {
+   type: "HDF5Data"
+   top: "state"
+   top: "label"
+   hdf5_data_param {
+     source: "/home/mgualti/mgualti/PickAndPlace/simulation/caffe/fileNameList-train.txt"
+     batch_size: 32
+   }
+   include { phase:TRAIN }
+}
+layer {
+   type: "HDF5Data"
+   top: "state"
+   top: "label"
+   hdf5_data_param {
+     source: "/home/mgualti/mgualti/PickAndPlace/simulation/caffe/fileNameList-test.txt"
+     batch_size: 32
+   }
+   include { phase:TEST }
+} 
+layer {
+  type: 'InnerProduct'
+  name: 'ip1'
+  top: 'ip1'
+  bottom: 'state'
+  inner_product_param {
+    num_output: 60
+    weight_filler { type: 'xavier' }
+  }
+}
+layer {
+  type: "ReLU"
+  name: "relu1"
+  top: "ip1"
+  bottom: "ip1"
+}
+layer {
+  type: 'InnerProduct'
+  name: 'ip2'
+  top: 'ip2'
+  bottom: 'ip1'
+  inner_product_param {
+    num_output: 60
+    weight_filler { type: 'xavier' }
+  }
+}
+layer {
+  type: "ReLU"
+  name: "relu2"
+  top: "ip2"
+  bottom: "ip2"
+}
+layer {
+  type: 'InnerProduct'
+  name: 'ip3'
+  top: 'ip3'
+  bottom: 'ip2'
+  inner_product_param {
+    num_output: 1
+    weight_filler { type: 'xavier' }
+  }
+}
+layer {
+  type: "EuclideanLoss"
+  name: "loss"
+  top: "loss"
+  bottom: "ip3"
+  bottom: "label"  
+}
