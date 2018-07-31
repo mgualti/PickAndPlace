@@ -16,3 +16,5 @@ Contents:
  - simulation/python2: for reproducing the two-step simulation results.
  - RunBatchSimulation.sh: script for running several simulations sequentially.
  
+Notes:
+ - This code is integrated with the old, Matlab version of GPD. A newer, faster C++ version is available at https://github.com/atenpas/gpd. However, integration of the new version of GPD with this project would be somewhat non-trivial -- would need to change GPD to pass custom sized "grasp images" in addition to the grasp poses. See DetectGrasps.m for the data required by PickAndPlace.
