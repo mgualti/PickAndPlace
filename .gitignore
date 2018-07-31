@@ -14,7 +14,6 @@
 *.tuo
 *.vrb
 simulation/*.mat
-simulation/matlab/gpd2
 simulation/caffe/test.h5
 simulation/caffe/train.h5
 simulation/python/results.mat
